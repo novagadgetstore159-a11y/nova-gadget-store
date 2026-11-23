@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Login | Nova Gadget Store</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      background: #111927;
+      border: 1px solid #27364b;
+      border-radius: 14px;
+    }
+    .login-box h1 { font-size: 26px; }
+    .login-box label {
+      display: block;
+      margin-top: 18px;
+      font-size: 13px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 7px;
+      color: white;
+      background: #080b12;
+      border: 1px solid #27364b;
+      border-radius: 7px;
+    }
+    .login-box button {
+      width: 100%;
+      cursor: pointer;
+      border: 0;
+    }
+    #message {
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="login-box">
+    <p class="eyebrow">NOVA GADGET STORE</p>
+    <h1>Administrator Login</h1>
+    <p>Sign in to manage your store.</p>
+
+    <form id="login-form">
+      <label for="email">Business email</label>
+      <input
+        id="email"
+        type="email"
+        placeholder="Enter your email"
+        autocomplete="username"
+        required
+      >
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      >
+
+      <button class="button" type="submit">
+        Sign In
+      </button>
+    </form>
+
+    <p id="message" role="status"></p>
+    <p><a href="../">Return to Store</a></p>
+  </main>
+
+  <script type="module">
+    import { createClient } from
+      "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://supabase.com/dashboard/project/ihtgcjuxotrncnqrnwji/settings/api-keys";
+    const SUPABASE_KEY = "sb_publishable_hrji8iYJpP8LYL79WtNYYw_kz3_TiAq";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const form = document.getElementById("login-form");
+    const message = document.getElementById("message");
+    const button = form.querySelector("button");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      button.disabled = true;
+      message.textContent = "Signing in...";
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        message.textContent = "Login failed. Check your email and password.";
+        button.disabled = false;
+        return;
+      }
+
+      const { data, error: adminError } =
+        await supabase.rpc("is_store_admin");
+
+      if (adminError || data !== true) {
+        await supabase.auth.signOut();
+        message.textContent =
+          "This account does not have administrator access.";
+        button.disabled = false;
+        return;
+      }
+
+      window.location.href = "./index.html";
+    });
+  </script>
+
+</body>
+</html>
