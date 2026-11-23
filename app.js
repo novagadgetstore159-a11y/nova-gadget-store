@@ -1,4 +1,11 @@
+const SUPABASE_URL = "https://ihtgcjuxotrncnqrnwji.supabase.co";
 
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_hrji8iYJpP8LYL79WtNYYw_kz3_TiAq";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 const phoneNumber = "233242669790";
 
 let cart = [];
