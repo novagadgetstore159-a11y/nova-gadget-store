@@ -14,12 +14,7 @@ const phoneNumber = "233242669790";
 let cart = [];
 let deliveryZones = null;
 
-const products = [
-  { name: "Wireless Earbuds", price: null },
-  { name: "Smart Watches", price: null },
-  { name: "Bluetooth Speakers", price: null },
-  { name: "Power Banks", price: null }
-];
+let products = [];
 
 function formatGHS(amount) {
   return new Intl.NumberFormat("en-GH", {
@@ -51,45 +46,104 @@ async function loadDeliveryZones() {
   return deliveryZones;
 }
 
-// Add shopping buttons to products
-document.querySelectorAll(".products article").forEach((card, index) => {
-  const product = products[index];
 
-  if (!product) return;
+// Load products from Supabase and display them
+async function loadProducts() {
+  const container = document.querySelector(".products");
 
-  const button = document.createElement("button");
+  container.innerHTML = "<p>Loading products...</p>";
 
-  button.textContent = "Add to Cart +";
-  button.className = "button";
-  button.style.margin = "12px";
-  button.style.padding = "10px";
-  button.style.cursor = "pointer";
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("id, name, description, category, price, stock_quantity, image_url")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
 
-  button.addEventListener("click", () => {
-    const existing = cart.find(
-      item => item.name === product.name
-    );
+  if (error) {
+    console.error("Products loading error:", error);
+    container.innerHTML = "<p>Unable to load products. Please try again later.</p>";
+    return;
+  }
 
-    if (existing) {
-      existing.quantity++;
+  products = data || [];
+  container.innerHTML = "";
+
+  if (products.length === 0) {
+    container.innerHTML = "<p>No products available at the moment.</p>";
+    return;
+  }
+
+  products.forEach(product => {
+    const card = document.createElement("article");
+
+    const image = document.createElement("div");
+    image.className = "product-image";
+
+    if (product.image_url) {
+      const img = document.createElement("img");
+      img.src = product.image_url;
+      img.alt = product.name;
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "cover";
+      image.appendChild(img);
     } else {
-      cart.push({
-        ...product,
-        quantity: 1
-      });
+      image.textContent = "📦";
     }
 
-    updateCart();
+    const name = document.createElement("h3");
+    name.textContent = product.name;
 
-    button.textContent = "Added ✓";
+    const description = document.createElement("p");
+    description.textContent = product.description || "";
 
-    setTimeout(() => {
-      button.textContent = "Add to Cart +";
-    }, 1000);
+    const price = document.createElement("span");
+    price.className = "price";
+    price.textContent = formatGHS(Number(product.price));
+
+    const button = document.createElement("button");
+    button.className = "button";
+
+    const outOfStock = Number(product.stock_quantity) <= 0;
+    button.textContent = outOfStock ? "Out of Stock" : "Add to Cart +";
+    button.disabled = outOfStock;
+
+    button.addEventListener("click", () => {
+      const existing = cart.find(item => item.id === product.id);
+
+      if (existing) {
+        if (existing.quantity >= Number(product.stock_quantity)) {
+          alert("Sorry, there is not enough stock available.");
+          return;
+        }
+        existing.quantity++;
+      } else {
+        cart.push({
+          ...product,
+          quantity: 1
+        });
+      }
+
+      updateCart();
+      button.textContent = "Added ✓";
+
+      setTimeout(() => {
+        button.textContent = "Add to Cart +";
+      }, 1000);
+    });
+
+    card.appendChild(image);
+    card.appendChild(name);
+    card.appendChild(description);
+    card.appendChild(price);
+    card.appendChild(button);
+
+    container.appendChild(card);
   });
+}
 
-  card.appendChild(button);
-});
+loadProducts();
+
 
 // Create shopping cart
 const cartPanel = document.createElement("section");
