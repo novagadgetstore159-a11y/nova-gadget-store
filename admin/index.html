@@ -8,80 +8,520 @@
 <title>Nova Gadget Store Admin</title>
 <link rel="stylesheet" href="../styles.css">
 <style>
-.admin {max-width:1100px;margin:auto;padding:35px 6%}
-.admin h1 {font-size:34px}
-.admin h1 span {color:#69a5ff}
-.notice {padding:15px;background:#302515;border:1px solid #70572a;border-radius:9px;color:#f2d39b;font-size:13px}
-.stats {display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:25px 0}
-.stat,.panel {background:#111927;border:1px solid #27364b;border-radius:10px;padding:20px}
-.stat small {color:#9caabd}
-.stat h2 {margin:12px 0}
-.panel {margin:20px 0}
-.panel h2 {font-size:20px}
-table {width:100%;border-collapse:collapse;font-size:13px}
-td,th {padding:13px 8px;text-align:left;border-bottom:1px solid #27364b}
-th {color:#69a5ff}
-.admin a {color:#69a5ff}
-@media(max-width:600px) {
-.stats {grid-template-columns:1fr}
-table {font-size:11px}
+*{box-sizing:border-box}
+body{margin:0;background:#080b12;color:#fff;font-family:Arial,sans-serif}
+header{background:#111927;border-bottom:1px solid #27364b;padding:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header a{color:#69a5ff;text-decoration:none}
+.logo{font-size:21px;font-weight:bold;color:white}
+.logo span{color:#69a5ff}
+main{max-width:1100px;margin:auto;padding:22px}
+h1{font-size:30px}
+h2{font-size:21px}
+small,.muted{color:#9caabd}
+button,input,select,textarea{font:inherit}
+button{background:#1769e0;color:white;border:0;border-radius:7px;padding:11px 15px;cursor:pointer}
+button.secondary{background:#27364b}
+button.danger{background:#a83245}
+input,select,textarea{width:100%;padding:12px;margin:6px 0 13px;background:#080b12;color:white;border:1px solid #35465d;border-radius:7px}
+label{display:block;font-size:13px;color:#b8c7da}
+.panel,.stat{background:#111927;border:1px solid #27364b;border-radius:11px;padding:17px;margin:18px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat h2{margin:10px 0 0}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+.tabs button{background:#27364b}
+.tabs button.active{background:#1769e0}
+.tab{display:none}
+.tab.active{display:block}
+.row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #27364b;font-size:13px}
+th{color:#69a5ff}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.actions button{padding:8px 10px;font-size:12px}
+.notice{padding:12px;background:#302515;border:1px solid #66502c;border-radius:8px;margin:12px 0;color:#ffe0a0}
+#message{margin:12px 0;color:#69a5ff}
+.hidden{display:none!important}
+@media(max-width:650px){
+main{padding:14px}
+.stats{grid-template-columns:1fr 1fr}
+.row{grid-template-columns:1fr}
+h1{font-size:25px}
 }
 </style>
 </head>
 <body>
-<header class="header">
-<a class="logo" href="/">NOVA <span>ADMIN</span></a>
-<a href="../">View Store</a>
+
+<header>
+  <a class="logo" href="../">NOVA <span>ADMIN</span></a>
+  <div class="actions">
+    <a href="../">View Store</a>
+    <button class="secondary" id="logout">Sign Out</button>
+  </div>
 </header>
 
-<main class="admin">
-<p class="eyebrow">STORE MANAGEMENT</p>
-<h1>Nova Gadget Store <span>Admin</span></h1>
-<p>Welcome to your store management preview.</p>
+<main>
+<p class="muted">STORE MANAGEMENT</p>
+<h1>Nova Gadget Store <span style="color:#69a5ff">Admin</span></h1>
+<p class="muted">Manage your products, orders and delivery charges.</p>
 
-<div class="notice">
-<strong>Preview mode:</strong> This dashboard is not yet protected by administrator login and does not connect to live orders or customer records. Do not use it to store real customer information.
+<div id="message">Checking administrator access...</div>
+
+<section id="dashboard" class="hidden">
+
+<div class="stats">
+  <div class="stat"><small>Total Products</small><h2 id="productCount">0</h2></div>
+  <div class="stat"><small>Total Orders</small><h2 id="orderCount">0</h2></div>
+  <div class="stat"><small>Total Sales</small><h2 id="salesTotal">GH₵0.00</h2></div>
 </div>
 
-<section class="stats">
-<div class="stat">
-<small>Products in demo catalogue</small>
-<h2>4</h2>
+<div class="tabs">
+  <button class="active" data-tab="products">Products</button>
+  <button data-tab="orders">Orders</button>
+  <button data-tab="delivery">Delivery Fees</button>
+  <button data-tab="customers">Customers</button>
 </div>
-<div class="stat">
-<small>Orders received</small>
-<h2>0</h2>
-</div>
-<div class="stat">
-<small>Total sales</small>
-<h2>GH₵0.00</h2>
-</div>
-</section>
 
-<section class="panel">
+<!-- PRODUCTS -->
+<section class="tab active" id="products">
+<div class="panel">
 <h2>Product Management</h2>
-<p>Manage your product catalogue, prices, stock and product images.</p>
-<p><a href="#">Product management — coming soon</a></p>
+<form id="productForm">
+<input type="hidden" id="productId">
+
+<label>Product name</label>
+<input id="pName" required placeholder="e.g. Wireless Earbuds">
+
+<label>Description</label>
+<textarea id="pDescription" placeholder="Product details"></textarea>
+
+<div class="row">
+<div>
+<label>Category</label>
+<select id="pCategory" required>
+<option value="">Choose category</option>
+<option>Smartphone Accessories</option>
+<option>Headphones</option>
+<option>Earbuds</option>
+<option>Speakers</option>
+<option>Smart Watches</option>
+<option>Power Banks</option>
+<option>Other Gadgets</option>
+</select>
+</div>
+<div>
+<label>Price (GH₵)</label>
+<input id="pPrice" type="number" min="0" step="0.01" required>
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Stock quantity</label>
+<input id="pStock" type="number" min="0" step="1" required value="0">
+</div>
+<div>
+<label>Product image URL (optional)</label>
+<input id="pImage" type="url" placeholder="https://...">
+</div>
+</div>
+
+<button type="submit" id="saveProduct">Save Product</button>
+<button type="button" class="secondary" id="cancelEdit">Clear Form</button>
+</form>
+</div>
+
+<div class="panel">
+<h2>Existing Products</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="productsTable"></tbody>
+</table>
+</div>
+</div>
 </section>
 
-<section class="panel">
+<!-- ORDERS -->
+<section class="tab" id="orders">
+<div class="panel">
 <h2>Customer Orders</h2>
-<p>Review incoming orders and update delivery and payment status.</p>
-<p><a href="#">Order management — coming soon</a></p>
+<p class="muted">Review orders and update their delivery fees and status.</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr><th>Customer</th><th>Location</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+</thead>
+<tbody id="ordersTable"></tbody>
+</table>
+</div>
+</div>
 </section>
 
-<section class="panel">
-<h2>Customers</h2>
-<p>Customer records will appear here after the database is connected.</p>
+<!-- DELIVERY -->
+<section class="tab" id="delivery">
+<div class="panel">
+<h2>Delivery Zone Management</h2>
+<p class="muted">Update the standard delivery prices for your existing locations.</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Region</th><th>Location</th><th>Fee (GH₵)</th><th>Active</th><th>Action</th></tr></thead>
+<tbody id="zonesTable"></tbody>
+</table>
+</div>
+</div>
 </section>
 
-<section class="panel">
-<h2>Store Settings</h2>
-<p>Store: Nova Gadget Store</p>
-<p>Phone: 0242669790</p>
-<p>Email: novagadgetstore159@gmail.com</p>
-<p>Delivery: Nationwide, location-based charges</p>
+<!-- CUSTOMERS -->
+<section class="tab" id="customers">
+<div class="panel">
+<h2>Customer Records</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Customer</th><th>Phone</th><th>Email</th><th>Orders</th></tr></thead>
+<tbody id="customersTable"></tbody>
+</table>
+</div>
+</div>
+</section>
+
 </section>
 </main>
+
+<script type="module">
+import { createClient } from
+"https://esm.sh/@supabase/supabase-js@2";
+
+const SUPABASE_URL =
+"https://ihtgcjuxotrncnqrnwji.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_hrji8iYJpP8LYL79WtNYYw_kz3_TiAq";
+
+const db = createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const $ = id => document.getElementById(id);
+
+const money = value => "GH₵" +
+Number(value || 0).toFixed(2);
+
+const safe = value => String(value ?? "").replace(
+/[&<>"']/g,
+c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])
+);
+
+let products = [];
+let orders = [];
+let zones = [];
+
+function message(text,color="#69a5ff"){
+$("message").textContent=text;
+$("message").style.color=color;
+}
+
+async function start(){
+const {data:{session},error} = await db.auth.getSession();
+
+if(error || !session){
+location.href="./login.html";
+return;
+}
+
+const {data,isError} = await db.rpc("is_store_admin");
+
+if(isError || data !== true){
+await db.auth.signOut();
+location.href="./login.html";
+return;
+}
+
+$("dashboard").classList.remove("hidden");
+message("Administrator access confirmed.");
+
+await loadAll();
+}
+
+async function loadAll(){
+await Promise.all([
+loadProducts(),
+loadOrders(),
+loadZones()
+]);
+loadCustomers();
+updateStats();
+}
+
+async function loadProducts(){
+const {data,error}=await db.from("products")
+.select("*").order("created_at",{ascending:false});
+
+if(error){message("Products: "+error.message,"#ff7777");return;}
+
+products=data||[];
+$("productCount").textContent=products.length;
+
+$("productsTable").innerHTML=products.map(p=>`
+<tr>
+<td>${safe(p.name)}<br><small>${safe(p.category)}</small></td>
+<td>${money(p.price)}</td>
+<td>${safe(p.stock_quantity)}</td>
+<td>${p.is_active?"Active":"Hidden"}</td>
+<td><div class="actions">
+<button class="secondary" data-edit="${p.id}">Edit</button>
+<button class="secondary" data-toggle="${p.id}">${p.is_active?"Hide":"Show"}</button>
+<button class="danger" data-delete="${p.id}">Delete</button>
+</div></td>
+</tr>`).join("") || "<tr><td colspan='5'>No products found.</td></tr>";
+}
+
+async function loadOrders(){
+const {data,error}=await db.from("orders")
+.select("*").order("created_at",{ascending:false});
+
+if(error){message("Orders: "+error.message,"#ff7777");return;}
+
+orders=data||[];
+$("orderCount").textContent=orders.length;
+
+$("ordersTable").innerHTML=orders.map(o=>`
+<tr>
+<td>${safe(o.customer_name)}<br><small>${safe(o.customer_phone)}</small></td>
+<td>${safe(o.town)}, ${safe(o.region)}</td>
+<td>${money(o.total)}</td>
+<td>
+<select data-status="${o.id}">
+${["pending","confirmed","processing","shipped","delivered","cancelled"].map(s=>
+`<option value="${s}" ${o.order_status===s?"selected":""}>${s}</option>`
+).join("")}
+</select>
+</td>
+<td><div class="actions">
+<button data-fee="${o.id}">Edit Fee</button>
+<button class="secondary" data-details="${o.id}">Details</button>
+</div></td>
+</tr>`).join("") || "<tr><td colspan='5'>No orders received yet.</td></tr>";
+}
+
+async function loadZones(){
+const {data,error}=await db.from("delivery_zones")
+.select("*").order("region").order("location_name");
+
+if(error){message("Delivery zones: "+error.message,"#ff7777");return;}
+
+zones=data||[];
+
+$("zonesTable").innerHTML=zones.map(z=>`
+<tr>
+<td>${safe(z.region)}</td>
+<td>${safe(z.location_name)}</td>
+<td><input type="number" min="0" step="0.01" value="${Number(z.delivery_fee)}" data-zone-fee="${z.id}"></td>
+<td>${z.is_active?"Yes":"No"}</td>
+<td><button data-zone-save="${z.id}">Save Fee</button></td>
+</tr>`).join("") || "<tr><td colspan='5'>No delivery zones found.</td></tr>";
+}
+
+function loadCustomers(){
+const customers={};
+
+orders.forEach(o=>{
+const key=o.customer_phone||o.customer_name;
+if(!customers[key]){
+customers[key]={name:o.customer_name,phone:o.customer_phone,email:o.customer_email,count:0};
+}
+customers[key].count++;
+});
+
+$("customersTable").innerHTML=Object.values(customers).map(c=>`
+<tr>
+<td>${safe(c.name)}</td>
+<td>${safe(c.phone)}</td>
+<td>${safe(c.email)}</td>
+<td>${c.count}</td>
+</tr>`).join("") || "<tr><td colspan='4'>No customer records yet.</td></tr>";
+}
+
+function updateStats(){
+const sales=orders
+.filter(o=>o.order_status!=="cancelled")
+.reduce((sum,o)=>sum+Number(o.total||0),0);
+
+$("salesTotal").textContent=money(sales);
+}
+
+$("productForm").addEventListener("submit",async e=>{
+e.preventDefault();
+
+const id=$("productId").value;
+
+const record={
+name:$("pName").value.trim(),
+description:$("pDescription").value.trim(),
+category:$("pCategory").value,
+price:Number($("pPrice").value),
+stock_quantity:Number($("pStock").value),
+image_url:$("pImage").value.trim()||null,
+is_active:true
+};
+
+const result=id
+?await db.from("products").update({...record,updated_at:new Date().toISOString()}).eq("id",id)
+:await db.from("products").insert(record);
+
+if(result.error){message("Could not save product: "+result.error.message,"#ff7777");return;}
+
+$("productForm").reset();
+$("productId").value="";
+$("saveProduct").textContent="Save Product";
+message("Product saved successfully.");
+await loadProducts();
+});
+
+$("cancelEdit").addEventListener("click",()=>{
+$("productForm").reset();
+$("productId").value="";
+$("saveProduct").textContent="Save Product";
+});
+
+$("productsTable").addEventListener("click",async e=>{
+const edit=e.target.dataset.edit;
+const toggle=e.target.dataset.toggle;
+const del=e.target.dataset.delete;
+
+if(edit){
+const p=products.find(x=>x.id===edit);
+if(!p)return;
+$("productId").value=p.id;
+$("pName").value=p.name||"";
+$("pDescription").value=p.description||"";
+$("pCategory").value=p.category||"";
+$("pPrice").value=p.price;
+$("pStock").value=p.stock_quantity;
+$("pImage").value=p.image_url||"";
+$("saveProduct").textContent="Update Product";
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+if(toggle){
+const p=products.find(x=>x.id===toggle);
+if(!p)return;
+const {error}=await db.from("products")
+.update({is_active:!p.is_active,updated_at:new Date().toISOString()})
+.eq("id",toggle);
+if(error){message(error.message,"#ff7777");return;}
+await loadProducts();
+}
+
+if(del){
+if(!confirm("Delete this product?"))return;
+const {error}=await db.from("products").delete().eq("id",del);
+if(error){message("Could not delete product: "+error.message,"#ff7777");return;}
+message("Product deleted.");
+await loadProducts();
+}
+});
+
+$("ordersTable").addEventListener("change",async e=>{
+const id=e.target.dataset.status;
+if(!id)return;
+
+const {error}=await db.from("orders")
+.update({order_status:e.target.value}).eq("id",id);
+
+if(error){message("Status update failed: "+error.message,"#ff7777");return;}
+
+message("Order status updated.");
+await loadOrders();
+updateStats();
+loadCustomers();
+});
+
+$("ordersTable").addEventListener("click",async e=>{
+const feeId=e.target.dataset.fee;
+const detailsId=e.target.dataset.details;
+
+if(feeId){
+const order=orders.find(o=>o.id===feeId);
+if(!order)return;
+
+const answer=prompt("Enter the new delivery fee in GH₵:",order.delivery_fee);
+if(answer===null)return;
+
+const fee=Number(answer);
+if(!Number.isFinite(fee)||fee<0){
+alert("Enter a valid delivery fee.");
+return;
+}
+
+const subtotal=Number(order.subtotal||0);
+const {error}=await db.from("orders").update({
+delivery_fee:fee,
+total:subtotal+fee
+}).eq("id",feeId);
+
+if(error){message("Fee update failed: "+error.message,"#ff7777");return;}
+
+message("Order delivery fee updated.");
+await loadOrders();
+updateStats();
+}
+
+if(detailsId){
+const o=orders.find(x=>x.id===detailsId);
+if(!o)return;
+alert(
+"ORDER DETAILS\n\n"+
+"Customer: "+o.customer_name+
+"\nPhone: "+o.customer_phone+
+"\nEmail: "+(o.customer_email||"Not provided")+
+"\nRegion: "+o.region+
+"\nTown: "+o.town+
+"\nAddress: "+o.delivery_address+
+"\nPayment: "+o.payment_method+
+"\nPayment status: "+o.payment_status+
+"\nOrder status: "+o.order_status+
+"\nSubtotal: "+money(o.subtotal)+
+"\nDelivery: "+money(o.delivery_fee)+
+"\nTotal: "+money(o.total)
+);
+}
+});
+
+$("zonesTable").addEventListener("click",async e=>{
+const id=e.target.dataset.zoneSave;
+if(!id)return;
+
+const input=document.querySelector(`[data-zone-fee="${id}"]`);
+const fee=Number(input.value);
+
+if(!Number.isFinite(fee)||fee<0){
+alert("Enter a valid delivery fee.");
+return;
+}
+
+const {error}=await db.from("delivery_zones")
+.update({delivery_fee:fee}).eq("id",id);
+
+if(error){message("Delivery fee update failed: "+error.message,"#ff7777");return;}
+
+message("Delivery zone fee updated.");
+await loadZones();
+});
+
+document.querySelectorAll("[data-tab]").forEach(button=>{
+button.addEventListener("click",()=>{
+document.querySelectorAll("[data-tab]").forEach(b=>b.classList.remove("active"));
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+button.classList.add("active");
+$(button.dataset.tab).classList.add("active");
+});
+});
+
+$("logout").addEventListener("click",async()=>{
+await db.auth.signOut();
+location.href="./login.html";
+});
+
+start();
+</script>
 </body>
 </html>
