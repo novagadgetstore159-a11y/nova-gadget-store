@@ -303,15 +303,34 @@ document.querySelector("#checkout").addEventListener("click", async () => {
   const locationSelect = form.querySelector('[name="location"]');
   const preview = form.querySelector("#delivery-preview");
 
-  // Populate available regions
-  const regions = [...new Set(zones.map(zone => zone.region))];
+  
+// Populate all 16 regions of Ghana
+const regions = [
+  "Ahafo",
+  "Ashanti",
+  "Bono",
+  "Bono East",
+  "Central",
+  "Eastern",
+  "Greater Accra",
+  "North East",
+  "Northern",
+  "Oti",
+  "Savannah",
+  "Upper East",
+  "Upper West",
+  "Volta",
+  "Western",
+  "Western North"
+];
 
-  regions.forEach(region => {
-    const option = document.createElement("option");
-    option.value = region;
-    option.textContent = region;
-    regionSelect.appendChild(option);
-  });
+regions.forEach(region => {
+  const option = document.createElement("option");
+  option.value = region;
+  option.textContent = region;
+  regionSelect.appendChild(option);
+});
+
 
   let selectedZone = null;
 
