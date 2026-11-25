@@ -187,7 +187,7 @@ function updateCart() {
     ">
       <strong>${item.name}</strong>
       <p>Quantity: ${item.quantity}</p>
-      <p>Product price: To be confirmed</p>
+      <p>Product price: ${formatGHS(Number(item.price))}</p>
 
       <button class="button remove-item" data-index="${index}">
         Remove
