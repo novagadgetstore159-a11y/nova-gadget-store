@@ -376,52 +376,90 @@ document.querySelector("#checkout").addEventListener("click", async () => {
   form.scrollIntoView({ behavior: "smooth" });
 
   // Submit order request to WhatsApp
-  form.addEventListener("submit", event => {
-    event.preventDefault();
+  
+form.addEventListener("submit", event => {
+  event.preventDefault();
+
+  const details = new FormData(form);
+  const region = details.get("region");
+
+  let deliveryLocation = "";
+  let feeText = "To be confirmed";
+
+  if (!region) {
+    alert("Please select your region.");
+    return;
+  }
+
+  if (
+    region === "Greater Accra" &&
+    locationSelect.value &&
+    locationSelect.value !== "other"
+  ) {
+    const selectedZone = zones.find(
+      zone => String(zone.id) === locationSelect.value
+    );
 
     if (!selectedZone) {
       alert("Please select a valid delivery location.");
       return;
     }
 
-    const details = new FormData(form);
+    deliveryLocation = selectedZone.location_name;
 
     const fee = Number(selectedZone.delivery_fee);
 
-    const orderItems = cart.map(item =>
-      `${item.name} x ${item.quantity} (price to confirm)`
-    ).join("\n");
+    if (!Number.isFinite(fee) || fee < 0) {
+      alert("Delivery fee is unavailable for this location.");
+      return;
+    }
 
-    const message = `
+    feeText = formatGHS(fee);
+
+  } else {
+    deliveryLocation = customInput.value.trim();
+
+    if (!deliveryLocation) {
+      alert("Please enter your delivery town or community.");
+      return;
+    }
+  }
+
+  const orderItems = cart.map(item =>
+    `${item.name} x ${item.quantity} (price to confirm)`
+  ).join("\n");
+
+  const message = `
 NEW ORDER REQUEST - NOVA GADGET STORE
 
 Customer: ${details.get("name")}
 Phone: ${details.get("phone")}
 
-Region: ${selectedZone.region}
-Delivery location: ${selectedZone.location_name}
+Region: ${region}
+Delivery location: ${deliveryLocation}
 Detailed address: ${details.get("address")}
 
-Delivery fee: ${formatGHS(fee)}
+Delivery fee: ${feeText}
 
 Preferred payment: ${details.get("payment")}
 
 ORDER ITEMS:
 ${orderItems}
 
-Please confirm product availability and product prices before payment.
+Please confirm product availability and prices before payment.
 
-Delivery fee retrieved from the store's delivery system.
+Delivery fee will be confirmed by Nova Gadget Store where applicable.
 `;
 
-    const whatsappURL =
-      "https://wa.me/" + phoneNumber +
-      "?text=" + encodeURIComponent(message);
+  const whatsappURL =
+    "https://wa.me/" + phoneNumber +
+    "?text=" + encodeURIComponent(message);
 
-    window.open(whatsappURL, "_blank");
+  window.open(whatsappURL, "_blank");
 
-    alert(
-      "Your order request is ready. Please send the WhatsApp message to complete your request."
-    );
-  });
+  alert(
+    "Your order request is ready. Please send the WhatsApp message to complete your request."
+  );
+});
+
 });
