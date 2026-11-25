@@ -333,33 +333,61 @@ regions.forEach(region => {
 
 
   let selectedZone = null;
+const customContainer = form.querySelector("#custom-location-container");
+const customInput = form.querySelector("#custom-location");
 
-  // Update locations when region changes
-  regionSelect.addEventListener("change", () => {
+// Update locations when region changes
+regionSelect.addEventListener("change", () => {
     selectedZone = null;
+    customInput.value = "";
+    customContainer.style.display = "none";
+    customInput.required = false;
 
     locationSelect.innerHTML =
-      '<option value="">Choose your delivery location</option>';
+        '<option value="">Choose your delivery location</option>';
 
-    locationSelect.disabled = true;
+    preview.innerHTML =
+        "<p>Select your delivery location to see the fee.</p>";
 
-    preview.innerHTML = `
-      <p>Select your delivery location to see the fee.</p>
-    `;
+    if (regionSelect.value === "Greater Accra") {
+        // Show the predefined Greater Accra locations
+        locationSelect.disabled = false;
+        locationSelect.required = true;
 
-    const matchingZones = zones.filter(
-      zone => zone.region === regionSelect.value
-    );
+        const matchingZones = zones.filter(
+            zone => zone.region === "Greater Accra"
+        );
 
-    matchingZones.forEach(zone => {
-      const option = document.createElement("option");
-      option.value = zone.id;
-      option.textContent = zone.location_name;
-      locationSelect.appendChild(option);
-    });
+        matchingZones.forEach(zone => {
+            const option = document.createElement("option");
+            option.value = zone.id;
+            option.textContent = zone.location_name;
+            locationSelect.appendChild(option);
+        });
 
-    locationSelect.disabled = matchingZones.length === 0;
-  });
+        // Allow customers to enter an unlisted Greater Accra location
+        const otherOption = document.createElement("option");
+        otherOption.value = "other";
+        otherOption.textContent = "Other";
+        locationSelect.appendChild(otherOption);
+
+} else if (regionSelect.value !== "") {
+        // For all other regions, allow manual location entry
+        locationSelect.disabled = true;
+        locationSelect.required = false;
+
+        customContainer.style.display = "block";
+        customInput.required = true;
+
+        preview.innerHTML =
+            "<p>Enter your town or community. Delivery fee will be confirmed by Nova Gadget Store.</p>";
+
+    } else {
+        locationSelect.disabled = true;
+        locationSelect.required = false;
+    }
+});
+
 
   // Calculate and display delivery fee
   locationSelect.addEventListener("change", () => {
