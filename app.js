@@ -263,7 +263,15 @@ document.querySelector("#checkout").addEventListener("click", async () => {
       style="display:block;width:100%;padding:12px;margin:8px 0">
       <option value="">Choose your delivery location</option>
     </select>
-
+<div id="custom-location-container" style="display:none">
+  <label>Enter your town or community</label>
+  <input
+    id="custom-location"
+    type="text"
+    placeholder="Enter your exact delivery location"
+    style="display:block;width:100%;padding:12px;margin:8px 0"
+  >
+</div>
     <div id="delivery-preview" style="
       padding:14px;
       margin:12px 0;
