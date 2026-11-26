@@ -398,35 +398,57 @@ regionSelect.addEventListener("change", () => {
 
 
   // Calculate and display delivery fee
-  locationSelect.addEventListener("change", () => {
+
+locationSelect.addEventListener("change", () => {
+    selectedZone = null;
+    customInput.value = "";
+
+    // If customer selects Other in Greater Accra
+    if (locationSelect.value === "other") {
+        customContainer.style.display = "block";
+        customInput.required = true;
+
+        preview.innerHTML = `
+            <p>Enter your town or community.</p>
+            <p>Delivery fee will be confirmed by Nova Gadget Store.</p>
+        `;
+        return;
+    }
+
+    // Hide custom location field for listed locations
+    customContainer.style.display = "none";
+    customInput.required = false;
+
+    // Find the selected Greater Accra location
     selectedZone = zones.find(
-      zone => String(zone.id) === locationSelect.value
+        zone => String(zone.id) === locationSelect.value
     );
 
     if (!selectedZone) {
-      preview.innerHTML = `
-        <p>Select a delivery location.</p>
-      `;
-      return;
+        preview.innerHTML = `
+            <p>Select a delivery location.</p>
+        `;
+        return;
     }
 
     const fee = Number(selectedZone.delivery_fee);
 
     if (!Number.isFinite(fee) || fee < 0) {
-      selectedZone = null;
-      preview.innerHTML = `
-        <p>Delivery fee is unavailable for this location.</p>
-      `;
-      return;
+        selectedZone = null;
+        preview.innerHTML = `
+            <p>Delivery fee is unavailable for this location.</p>
+        `;
+        return;
     }
 
     preview.innerHTML = `
-      <p><strong>Delivery location:</strong>
-        ${selectedZone.location_name}</p>
-      <p><strong>Delivery fee:</strong>
-        ${formatGHS(fee)}</p>
+        <p><strong>Delivery location:</strong></p>
+        <p>${selectedZone.location_name}</p>
+        <p><strong>Delivery fee:</strong></p>
+        <p>${formatGHS(fee)}</p>
     `;
-  });
+});
+
 
   form.scrollIntoView({ behavior: "smooth" });
 
